@@ -1,0 +1,198 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ServerFarmRegion1Name": {
+            "type": "string"
+        },
+        "ServerFarmRegion1Location": {
+            "type": "string"
+        },
+         "ServerFarmRegion2Name": {
+            "type": "string"
+        },
+        "ServerFarmRegion2Location": {
+            "type": "string"
+        },
+        "ServerFarmSKU": {
+            "type": "string",
+            "allowedValues": [
+                "Free",
+                "Shared",
+                "Basic",
+                "Standard"
+            ],
+            "defaultValue": "Free"
+        },
+        "ServerFarmWorkerSize": {
+            "type": "string",
+            "allowedValues": [
+                "0",
+                "1",
+                "2"
+            ],
+            "defaultValue": "0"
+        },
+        "Region1WebSiteName": {
+            "type": "string"
+        },
+        "Region2WebSiteName": {
+            "type": "string"
+        },
+        "WebDeployPackage": {
+            "type": "string"
+        },
+        "WebAppSetting1": {
+            "type": "string"
+        },
+        "TrafficManagerProfileName": {
+            "type": "string"
+        },
+        "TrafficManagerProfileDomainName": {
+            "type": "string"
+        },
+        "TrafficManagerLoadBalancingMethod": {
+            "type": "string"
+        },
+        "_artifactsLocation": {
+            "type": "string"
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring"
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "name": "[parameters('ServerFarmRegion1Name')]",
+            "type": "Microsoft.Web/serverfarms",
+            "location": "[parameters('ServerFarmRegion1Location')]",
+            "apiVersion": "2014-11-01",
+            "dependsOn": [ ],
+            "properties": {
+                "name": "[parameters('ServerFarmRegion1Name')]",
+                "sku": "[parameters('ServerFarmSKU')]",
+                "workerSize": "[parameters('ServerFarmWorkerSize')]",
+                "numberOfWorkers": 1
+            }
+        },
+          {
+            "name": "[parameters('ServerFarmRegion2Name')]",
+            "type": "Microsoft.Web/serverfarms",
+            "location": "[parameters('ServerFarmRegion2Location')]",
+            "apiVersion": "2014-11-01",
+            "dependsOn": [ ],
+            "properties": {
+                "name": "[parameters('ServerFarmRegion2Name')]",
+                "sku": "[parameters('ServerFarmSKU')]",
+                "workerSize": "[parameters('ServerFarmWorkerSize')]",
+                "numberOfWorkers": 1
+            }
+        },
+        {
+            "name": "[parameters('Region1WebSiteName')]",
+            "type": "Microsoft.Web/sites",
+            "location": "[parameters('ServerFarmRegion1Location')]",
+            "apiVersion": "2014-11-01",
+            "dependsOn": [
+                "[concat('Microsoft.Web/serverfarms/', parameters('ServerFarmRegion1Name'))]"
+            ],
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('ServerFarmRegion1Name'))]": "Resource",
+                "displayName": "Region1WebSite"
+            },
+            "properties": {
+                "name": "[parameters('Region1WebSiteName')]",
+                "serverFarm": "[parameters('ServerFarmRegion1Name')]"
+            },
+            "resources": [
+                {
+                    "name": "MSDeploy",
+                    "type": "extensions",
+                    "location": "[parameters('ServerFarmRegion1Location')]",
+                    "apiVersion": "2014-11-01",
+                    "dependsOn": [
+                        "[concat('Microsoft.Web/sites/', parameters('Region1WebSiteName'))]"
+                    ],
+                    "tags": {
+                        "displayName": "MyAwesomeWebSiteWebDeployRegion1"
+                    },
+                    "properties": {
+                        "packageUri": "[concat(parameters('_artifactsLocation'), '/', parameters('WebDeployPackage'), parameters('_artifactsLocationSasToken'))]",
+                        "dbType": "None",
+                        "connectionString": "",
+                        "setParameters": {
+                            "IIS Web Application Name": "[parameters('Region1WebSiteName')]"
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "2014-11-01",
+                    "name": "appsettings",
+                    "type": "config",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('Region1WebSiteName'))]"
+                    ],
+                    "properties": {
+                        "WebAppSetting1": "[parameters('WebAppSetting1')]",
+                        "WebAppSiteName": "[parameters('Region1WebSiteName')]"
+                    }
+                }
+            ]
+        }
+        ,  {
+            "name": "[parameters('Region2WebSiteName')]",
+            "type": "Microsoft.Web/sites",
+            "location": "[parameters('ServerFarmRegion2Location')]",
+            "apiVersion": "2014-11-01",
+            "dependsOn": [
+                "[concat('Microsoft.Web/serverfarms/', parameters('ServerFarmRegion2Name'))]"
+            ],
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('ServerFarmRegion2Name'))]": "Resource",
+                "displayName": "Region2WebSite"
+            },
+            "properties": {
+                "name": "[parameters('Region2WebSiteName')]",
+                "serverFarm": "[parameters('ServerFarmRegion2Name')]"
+            },
+            "resources": [
+                {
+                    "name": "MSDeploy",
+                    "type": "extensions",
+                    "location": "[parameters('ServerFarmRegion2Location')]",
+                    "apiVersion": "2014-11-01",
+                    "dependsOn": [
+                        "[concat('Microsoft.Web/sites/', parameters('Region2WebSiteName'))]"
+                    ],
+                    "tags": {
+                        "displayName": "MyAwesomeWebSiteWebDeployRegion2"
+                    },
+                    "properties": {
+                        "packageUri": "[concat(parameters('_artifactsLocation'), '/', parameters('WebDeployPackage'), parameters('_artifactsLocationSasToken'))]",
+                        "dbType": "None",
+                        "connectionString": "",
+                        "setParameters": {
+                            "IIS Web Application Name": "[parameters('Region2WebSiteName')]"
+                        }
+                    }
+                },
+                {
+                  "apiVersion": "2014-11-01",
+                  "name": "appsettings",
+                  "type": "config",
+                  "dependsOn": [
+                    "[resourceId('Microsoft.Web/Sites', parameters('Region2WebSiteName'))]"
+                  ],
+                  "properties": {
+                    "WebAppSetting1": "[parameters('WebAppSetting1')]",
+                    "WebAppSiteName": "[parameters('Region2WebSiteName')]"
+                  }
+        }
+            ]
+        }
+    ],
+    "outputs": {
+    }
+}

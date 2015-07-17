@@ -1,0 +1,42 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ServerFarmRegion1Name": {
+            "value": "ServerFarmRegion1"
+        },
+        "ServerFarmRegion1Location": {
+            "value": "East US"
+        },
+        "ServerFarmRegion2Name": {
+            "value": "ServerFarmRegion2"
+        },
+        "ServerFarmRegion2Location": {
+            "value": "West US"
+        },
+        "ServerFarmSKU": {
+            "value": "Standard"
+        },
+        "Region1WebSiteName": {
+            "value": "NameOfWebSiteInRegion1XXX"
+        },
+        "Region2WebSiteName": {
+            "value": "NameOfWebSiteInRegion2XXX"
+        },
+        "WebDeployPackage": {
+            "value": "WebApplication/package.zip"
+        },
+        "WebAppSetting1": {
+            "value": "somesetting"
+        },
+        "TrafficManagerProfileName": {
+            "value": "DevMultiRegionTM"
+        },
+        "TrafficManagerProfileDomainName": {
+            "value": "DevMultiRegionTM.trafficmanager.net"
+        },
+        "TrafficManagerLoadBalancingMethod": {
+            "value": "RoundRobin" 
+        }
+    }
+}
